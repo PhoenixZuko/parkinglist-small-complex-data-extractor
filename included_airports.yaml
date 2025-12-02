@@ -1,0 +1,21 @@
+# included_airports defines which airports will be processed.
+# All airports listed here are available.
+# To activate an airport, remove the '#' in front of it.
+# To deactivate one, just comment it out by adding '#' again.
+# This gives you full control over which airports are included.
+
+included_airports:
+  - hannover
+  - stuttgart
+  - nuernberg       # Nuremberg = "nuernberg" in URL
+  - leipzig
+  - bremen
+#  - brandenburg
+#  - dresden
+#  - duesseldorf
+#  - frankfurt
+#  - koeln-bonn
+#  - memmingen
+#  - muenchen
+#  - salzburg
+#  - wien

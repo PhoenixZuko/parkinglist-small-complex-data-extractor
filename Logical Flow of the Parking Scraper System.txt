@@ -1,0 +1,85 @@
+**Logical Flow of the Parking Scraper System**
+
+---
+
+### 1. **Start: `main.py`**
+
+* The main script is executed to initiate the process.
+
+---
+
+### 2. **Read Configuration from `included_airports.yaml`**
+
+* This file contains instructions for enabling/disabling specific airports.
+* Based on the configuration, the list of active airports is generated and saved to:
+
+  * `core/airports.txt`
+
+---
+
+### 3. **Iterate Through Airports (`airports.txt`)**
+
+* For each airport URL:
+
+  * The program generates combinations of dates using the logic:
+
+    ```python
+    durations = range(1, 15)  # 14 durations
+    for n in range(1, 6):     # 5 start dates from today
+    ```
+  * This results in **70 combinations per airport**.
+
+---
+
+### 4. **Process Each Date Combination**
+
+* Accesses the airport page using undetected Chrome.
+* Saves each resulting HTML page in:
+
+  * `saved_pages/`
+* Saves the processing status in:
+
+  * `progress.log`
+  * Format: `airport_url|from_date|to_date`
+
+---
+
+### 5. **After Completing All Combinations for an Airport**
+
+* The airport URL is removed from `airports.txt`
+* The script continues with the next airport.
+
+---
+
+### 6. **If the Program is Interrupted**
+
+* Upon restart:
+
+  * Checks which combinations were already processed (via `progress.log`)
+  * Resumes from the exact point it was interrupted
+
+---
+
+### 7. **When All Airports and Dates Are Completed**
+
+* The `finalizer.py` script is triggered:
+
+  * Verifies that `airports.txt` is empty and `progress.log` is not.
+  * If so:
+
+    * Clears `progress.log`
+    * Executes `extract_parking_data.py`
+
+      * Parses all HTML files from `saved_pages/`
+      * Saves results in `json_out/parking_data.json`
+    * Moves all processed `.html` files to:
+
+      * `old_saved_pages/YYYY-MM-DD_HH-MM-SS/`
+
+---
+
+### 8. **Result**
+
+* The system can restart fresh if completed.
+* If interrupted, it resumes without losing progress.
+* Organized data flow and archiving ensure reliability and clarity.
