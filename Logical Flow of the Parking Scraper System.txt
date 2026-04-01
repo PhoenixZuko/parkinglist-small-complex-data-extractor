@@ -83,3 +83,97 @@
 * The system can restart fresh if completed.
 * If interrupted, it resumes without losing progress.
 * Organized data flow and archiving ensure reliability and clarity.
+
+
+
+Logical Flow – Parking Scraper System
+Overview
+
+This system is designed as a resumable, multi-stage extraction pipeline, optimized for long-running execution and fault tolerance.
+It ensures that progress is never lost and that data processing remains consistent and repeatable.
+
+1. Entry Point – main.py
+The execution starts from main.py.
+This script initializes the scraping workflow and orchestrates the entire process.
+2. Configuration Layer – included_airports.yaml
+Defines which airports are enabled or disabled.
+Based on this configuration, the system generates the active airport list:
+core/airports.txt
+3. Airport Iteration
+The system processes each airport sequentially from airports.txt.
+For every airport, it generates date combinations:
+durations = range(1, 15)  # 14 durations
+for n in range(1, 6):     # 5 start dates
+Result:
+70 combinations per airport
+4. Extraction Phase
+
+For each combination:
+
+Opens the page using undetected Chrome automation
+Saves raw HTML to:
+saved_pages/
+Logs progress in:
+progress.log
+
+Format:
+
+airport_url | from_date | to_date
+5. Completion per Airport
+Once all combinations are processed:
+The airport is removed from airports.txt
+The system proceeds to the next airport
+6. Resume Mechanism (Critical Feature)
+
+If execution is interrupted:
+
+The system reads progress.log
+Skips already processed combinations
+Continues exactly from the last unprocessed state
+
+This ensures:
+
+no duplicate processing
+no data loss
+efficient recovery after failure
+7. Finalization Phase – finalizer.py
+
+Triggered when all airports are completed:
+
+Validates:
+airports.txt is empty
+progress.log contains completed entries
+
+Then:
+
+Clears progress.log
+Executes:
+extract_parking_data.py
+
+Which:
+
+Parses all HTML files
+Extracts structured data
+Saves output:
+json_out/parking_data.json
+Archives processed files:
+old_saved_pages/YYYY-MM-DD_HH-MM-SS/
+8. Output & System State
+Final structured dataset available in JSON format
+HTML files safely archived
+System reset for next execution cycle
+Key Design Principles
+Resumable execution → no loss of progress
+Separation of stages → extraction, parsing, finalization
+Deterministic processing → same input → same output
+Fault tolerance → safe recovery from interruptions
+Clean data lifecycle → raw → processed → archived
+Summary
+
+The system behaves as a robust data pipeline, not a simple scraper:
+
+generates controlled extraction scenarios
+tracks progress persistently
+supports interruption and recovery
+processes and structures data in stages
+maintains clean and auditable outputs
